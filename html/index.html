@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>QR Code with Logo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: #f5f5f5;
+        }
+
+        #qr {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input,
+        button {
+            padding: 10px;
+            font-size: 16px;
+            margin: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>IMIQ QR Code Generator</h2>
+
+    <input type="text" id="text" placeholder="Enter URL or text" value="https://imiq.ovgu.de">
+    <button onclick="generateQR()">Generate QR</button>
+    <button onclick="copyQRImage()">Copy QR Image</button>
+
+    <div id="qr"></div>
+
+    <!-- Library CDN -->
+    <script src="https://unpkg.com/qr-code-styling/lib/qr-code-styling.js"></script>
+
+    <script>
+        let qrCode;
+
+        function generateQR() {
+            const data = document.getElementById("text").value;
+
+            // clear old QR
+            document.getElementById("qr").innerHTML = "";
+
+            qrCode = new QRCodeStyling({
+                width: 256,
+                height: 256,
+                margin: 10,
+                data: data,
+                errorCorrectionLevel: "H",
+                image: "/logo.png",
+                dotsOptions: {
+                    gradient: {
+                        type: "linear",
+                        rotation: 315,
+                        colorStops: [
+                            { offset: 0, color: "#a5c4d4" },
+                            { offset: 1, color: "#623cea" }
+                        ]
+                    }
+                },
+                backgroundOptions: {
+                    color: "#ffffff"
+                },
+                imageOptions: {
+                    crossOrigin: "anonymous",
+                    margin: 5,
+                    imageSize: 0.4
+                }
+            });
+
+            const parent = document.getElementById("qr");
+            qrCode.append(parent);
+
+            // setTimeout to ensure QR code is rendered before drawing corners (hack)
+            setTimeout(() => {
+                const ctx = parent.children[0].getContext("2d");
+                ctx.strokeStyle = "#7a003f";
+                ctx.lineWidth = 15; // thickness
+
+                // top left
+                ctx.beginPath();
+                ctx.moveTo(50, 0);
+                ctx.lineTo(0, 0);
+                ctx.lineTo(0, 50);
+                ctx.stroke();
+                // bottom right
+                ctx.beginPath();
+                ctx.moveTo(206, 256);
+                ctx.lineTo(256, 256);
+                ctx.lineTo(256, 206);
+                ctx.stroke();
+            }, 100);
+        }
+
+        async function copyQRImage() {
+            if (!qrCode) {
+                return alert("Please generate a QR code first.");
+            }
+
+            if (!navigator.clipboard || !window.ClipboardItem) {
+                return alert("Clipboard image copy is not supported in this browser.");
+            }
+
+            try {
+                const blob = await qrCode.getRawData("png");
+                await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+                alert("QR image copied to clipboard!");
+            } catch (err) {
+                console.error(err);
+                alert("Failed to copy QR image. Try regenerating the QR code first.");
+            }
+        }
+
+        // generate default on load
+        generateQR();
+    </script>
+
+</body>
+
+</html>
