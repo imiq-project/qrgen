@@ -30,7 +30,7 @@ docker compose up -d
 Then open:
 
 ```
-http://localhost/qrgen.html
+http://localhost/qrgen/index.html
 ```
 
 ## Project structure
