@@ -2,3 +2,4 @@ services:
   qrgen:
     build: .
     pull_policy: build
+    restart: always
